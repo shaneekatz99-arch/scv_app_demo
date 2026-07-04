@@ -659,7 +659,10 @@
 
   <div class="bottom-nav">
     <button class="btn" id="btn-back" onclick="prev()" style="display:none">← Back</button>
-    <button class="btn btn-export" onclick="exportSummary()"><svg class="icon" width="16" height="16"><use href="#ico-download"/></svg> Export summary</button>
+    <div style="display:flex;gap:6px;flex:1;">
+      <button class="btn btn-export" style="flex:1;font-size:11px;" onclick="exportWord()"><svg class="icon" width="14" height="14"><use href="#ico-download"/></svg> Word</button>
+      <button class="btn btn-export" style="flex:1;font-size:11px;" onclick="exportSummary()"><svg class="icon" width="14" height="14"><use href="#ico-download"/></svg> Text</button>
+    </div>
     <button class="btn btn-primary" id="btn-next" onclick="next()">Next →</button>
   </div>
 
@@ -794,6 +797,329 @@
       badge.style.display = 'block';
       setTimeout(() => { badge.style.display = 'none'; }, 1400);
     }, 500);
+  }
+
+
+  // ── Word document export ──────────────────────────────────────────────────
+
+  function exportWord() {
+    const get = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+    const checkboxLabels = ['Feeling in control','Knowing my care providers','Having my decisions listened to and respected','Including my family in my care','Managing pain in a way that\'s right for me','Access to antenatal education','Including cultural or spiritual practices','Privacy and dignity at all times','Proactive discussions about my birth and labour','Developing a comprehensive birth plan'];
+    const ticked = checkboxLabels.filter((_, i) => document.getElementById('cb' + (i + 1)).checked);
+
+    // Collect antenatal visits in DOM order
+    const stdWeekIds = { 20: 'w20', 28: 'w28', 32: 'w32', 36: 'w36', 40: 'w40' };
+    const visitLabels = { 20: '20–22 week visit', 28: '28–30 week visit', 32: '32–34 week visit', 36: '36 week visit', 40: '40 week visit' };
+    const allCards = [...document.getElementById('visit-list').querySelectorAll('.visit-card[data-week]')];
+    const visits = allCards.map(card => {
+      const w = parseInt(card.dataset.week);
+      const isAdditional = card.classList.contains('additional');
+      const label = isAdditional ? (w + ' week visit (Additional)') : (visitLabels[w] || (w + ' week visit'));
+      const pid = isAdditional ? ('av' + w) : stdWeekIds[w];
+      return { label, important: get(pid + '-important'), questions: get(pid + '-questions'), with: get(pid + '-with'), date: get(pid + '-date') };
+    });
+
+    // Build Word XML
+    const TEAL = '1A6B6B';
+    const LIGHT_TEAL = 'E8F5F5';
+
+    function esc(s) {
+      return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function para(text, opts = {}) {
+      const { bold, size = 22, color = '000000', spaceAfter = 120, spaceBefore = 0, indent = 0, heading } = opts;
+      const pStyle = heading ? `<w:pStyle w:val="${heading}"/>` : '';
+      const spacing = `<w:spacing w:before="${spaceBefore}" w:after="${spaceAfter}"/>`;
+      const ind = indent ? `<w:ind w:left="${indent}"/>` : '';
+      const pPr = `<w:pPr>${pStyle}${spacing}${ind}</w:pPr>`;
+      const rPr = `<w:rPr>${bold ? '<w:b/>' : ''}<w:sz w:val="${size}"/><w:color w:val="${color}"/></w:rPr>`;
+      return `<w:p>${pPr}<w:r>${rPr}<w:t xml:space="preserve">${esc(text)}</w:t></w:r></w:p>`;
+    }
+
+    function sectionHeading(text) {
+      return `<w:p>
+        <w:pPr><w:spacing w:before="240" w:after="80"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="${TEAL}"/>
+          <w:pBdr><w:bottom w:val="single" w:sz="4" w:space="1" w:color="${TEAL}"/></w:pBdr>
+        </w:pPr>
+        <w:r><w:rPr><w:b/><w:sz w:val="22"/><w:color w:val="FFFFFF"/></w:rPr><w:t>${esc(text)}</w:t></w:r>
+      </w:p>`;
+    }
+
+    function subHeading(text) {
+      return `<w:p>
+        <w:pPr><w:spacing w:before="160" w:after="60"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="${LIGHT_TEAL}"/>
+        </w:pPr>
+        <w:r><w:rPr><w:b/><w:sz w:val="20"/><w:color w:val="${TEAL}"/></w:rPr><w:t>${esc(text)}</w:t></w:r>
+      </w:p>`;
+    }
+
+    function fieldLabel(text) {
+      return `<w:p>
+        <w:pPr><w:spacing w:before="120" w:after="40"/></w:pPr>
+        <w:r><w:rPr><w:b/><w:sz w:val="18"/><w:color w:val="555555"/><w:caps/></w:rPr><w:t>${esc(text)}</w:t></w:r>
+      </w:p>`;
+    }
+
+    function fieldValue(text) {
+      if (!text) return '';
+      return `<w:p>
+        <w:pPr><w:spacing w:before="0" w:after="80"/>
+          <w:pBdr><w:left w:val="single" w:sz="4" w:space="4" w:color="${TEAL}"/></w:pBdr>
+          <w:ind w:left="120"/>
+        </w:pPr>
+        <w:r><w:rPr><w:sz w:val="20"/><w:color w:val="222222"/></w:rPr><w:t xml:space="preserve">${esc(text)}</w:t></w:r>
+      </w:p>`;
+    }
+
+    function labelValue(label, value) {
+      if (!value) return '';
+      return fieldLabel(label) + fieldValue(value);
+    }
+
+    function bulletItem(text) {
+      return `<w:p>
+        <w:pPr><w:spacing w:before="40" w:after="40"/><w:ind w:left="360" w:hanging="360"/>
+          <w:numPr><w:ilvl w:val="0"/><w:numId w:val="1"/></w:numPr>
+        </w:pPr>
+        <w:r><w:rPr><w:sz w:val="20"/><w:color w:val="333333"/></w:rPr><w:t>${esc(text)}</w:t></w:r>
+      </w:p>`;
+    }
+
+    function discussedWith(withVal, dateVal) {
+      if (!withVal && !dateVal) return '';
+      const text = [withVal ? 'Discussed with: ' + withVal : '', dateVal ? 'Date: ' + dateVal : ''].filter(Boolean).join('   ');
+      return `<w:p>
+        <w:pPr><w:spacing w:before="80" w:after="80"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="F0F9F6"/>
+        </w:pPr>
+        <w:r><w:rPr><w:sz w:val="18"/><w:color w:val="2a7d8a"/><w:i/></w:rPr><w:t>${esc(text)}</w:t></w:r>
+      </w:p>`;
+    }
+
+    function hr() {
+      return `<w:p><w:pPr><w:spacing w:before="40" w:after="40"/>
+        <w:pBdr><w:bottom w:val="single" w:sz="4" w:space="1" w:color="DDDDDD"/></w:pBdr>
+      </w:pPr></w:p>`;
+    }
+
+    // Build document body
+    let body = '';
+
+    // Title
+    body += `<w:p>
+      <w:pPr><w:spacing w:before="0" w:after="80"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="${TEAL}"/>
+      </w:pPr>
+      <w:r><w:rPr><w:b/><w:sz w:val="32"/><w:color w:val="FFFFFF"/></w:rPr><w:t>Values-Based Maternity Care Plan</w:t></w:r>
+    </w:p>`;
+    body += `<w:p>
+      <w:pPr><w:spacing w:before="0" w:after="200"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="${TEAL}"/>
+      </w:pPr>
+      <w:r><w:rPr><w:sz w:val="18"/><w:color w:val="CCEEEE"/></w:rPr><w:t>Safer Care Victoria</w:t></w:r>
+    </w:p>`;
+
+    // About me
+    body += sectionHeading('About me');
+    const name = get('name'), pronouns = get('pronouns'), support = get('support'), careteam = get('careteam');
+    if (name) body += labelValue('Name', name);
+    if (pronouns) body += labelValue('Pronouns', pronouns);
+    if (support) body += labelValue('Support person/s', support);
+    if (careteam) body += labelValue('Care team', careteam);
+
+    // What matters
+    body += sectionHeading('What matters to me');
+    if (ticked.length) {
+      body += fieldLabel('My priorities');
+      ticked.forEach(t => { body += bulletItem(t); });
+    }
+    const mattersText = get('matters-text');
+    if (mattersText) body += labelValue('In my own words', mattersText);
+
+    // Booking visit
+    body += sectionHeading('Booking visit — First trimester');
+    const bh = get('booking-history'), bi = get('booking-important'), bq = get('booking-questions');
+    if (bh) body += labelValue('My medical history', bh);
+    if (bi) body += labelValue("What's important to me at this time", bi);
+    if (bq) body += labelValue('Questions for my healthcare provider', bq);
+    body += discussedWith(get('booking-with'), get('booking-date'));
+
+    // Antenatal visits
+    body += sectionHeading('Antenatal visits');
+    for (const v of visits) {
+      if (!v.important && !v.questions && !v.with && !v.date) continue;
+      body += subHeading(v.label);
+      if (v.important) body += labelValue("What's important to me at this time", v.important);
+      if (v.questions) body += labelValue('Questions for my provider', v.questions);
+      body += discussedWith(v.with, v.date);
+    }
+
+    // Labour and birth
+    body += sectionHeading('Labour and birth preferences');
+    const lw = get('labour-who'), li = get('labour-important'), lc = get('labour-comms'), lp = get('labour-procedures'), lq = get('labour-questions');
+    if (lw) body += labelValue('Who I want with me during labour', lw);
+    if (li) body += labelValue("What's important to me during labour and birth", li);
+    if (lc) body += labelValue('How I want people to communicate with me', lc);
+    if (lp) body += labelValue("Procedures or decisions I'd like to discuss beforehand", lp);
+    if (lq) body += labelValue('Questions or requests for my healthcare provider', lq);
+    body += discussedWith(get('labour-with'), get('labour-date'));
+
+    // Postnatal
+    body += sectionHeading('Postnatal care');
+    const pm = get('post-moments'), pmq = get('post-moments-q');
+    const pd = get('post-days'), pdq = get('post-days-q');
+    const ph = get('post-home'), phq = get('post-home-q');
+    if (pm || pmq) {
+      body += subHeading('Immediately after birth');
+      if (pm) body += labelValue("What's important to me in these first moments", pm);
+      if (pmq) body += labelValue('Questions or requests', pmq);
+    }
+    if (pd || pdq) {
+      body += subHeading('First days after birth');
+      if (pd) body += labelValue("What's important to me in the first days", pd);
+      if (pdq) body += labelValue('Questions or requests', pdq);
+    }
+    if (ph || phq) {
+      body += subHeading('Going home');
+      if (ph) body += labelValue("What's important to me as I settle home", ph);
+      if (phq) body += labelValue('Questions or requests', phq);
+    }
+    body += discussedWith(get('post-with'), get('post-date'));
+
+    // Footer note
+    body += hr();
+    body += para('Values-based Maternity Care Plan — keep this and bring it to every appointment', { size: 16, color: '888888', spaceAfter: 80 });
+
+    // ── Build the docx XML files ──
+    const documentXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:wpc="http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas"
+  xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+  xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"
+  xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml"
+  mc:Ignorable="w14 wpc" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006">
+<w:body>
+${body}
+<w:sectPr>
+  <w:pgSz w:w="11906" w:h="16838"/>
+  <w:pgMar w:top="1080" w:right="1080" w:bottom="1080" w:left="1080" w:header="720" w:footer="720" w:gutter="0"/>
+</w:sectPr>
+</w:body></w:document>`;
+
+    const numberingXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:numbering xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  <w:abstractNum w:abstractNumId="0">
+    <w:lvl w:ilvl="0">
+      <w:start w:val="1"/>
+      <w:numFmt w:val="bullet"/>
+      <w:lvlText w:val="&#x2022;"/>
+      <w:lvlJc w:val="left"/>
+      <w:pPr><w:ind w:left="360" w:hanging="360"/></w:pPr>
+      <w:rPr><w:sz w:val="20"/></w:rPr>
+    </w:lvl>
+  </w:abstractNum>
+  <w:num w:numId="1"><w:abstractNumId w:val="0"/></w:num>
+</w:numbering>`;
+
+    const stylesXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  <w:docDefaults>
+    <w:rPrDefault><w:rPr>
+      <w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/>
+      <w:sz w:val="22"/>
+      <w:color w:val="222222"/>
+    </w:rPr></w:rPrDefault>
+  </w:docDefaults>
+</w:styles>`;
+
+    const contentTypes = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
+  <Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>
+  <Override PartName="/word/numbering.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml"/>
+</Types>`;
+
+    const rels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
+</Relationships>`;
+
+    const wordRels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
+  <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering" Target="numbering.xml"/>
+</Relationships>`;
+
+    // ── ZIP builder using DataView for correct binary layout ──
+    function crc32(bytes) {
+      const t = new Uint32Array(256);
+      for (let i=0;i<256;i++){let c=i;for(let j=0;j<8;j++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[i]=c;}
+      let c=0xFFFFFFFF;
+      for (let i=0;i<bytes.length;i++)c=t[(c^bytes[i])&0xFF]^(c>>>8);
+      return(c^0xFFFFFFFF)>>>0;
+    }
+    const enc = new TextEncoder();
+    function makeZip(files) {
+      const localParts=[], centralDir=[];
+      let offset=0;
+      for (const [name,rawData] of files) {
+        const nb=enc.encode(name);
+        const db=typeof rawData==='string'?enc.encode(rawData):rawData;
+        const crc=crc32(db), size=db.length;
+        const lh=new DataView(new ArrayBuffer(30+nb.length));
+        lh.setUint32(0,0x04034b50,true); lh.setUint16(4,20,true); lh.setUint16(6,0,true);
+        lh.setUint16(8,0,true); lh.setUint16(10,0,true); lh.setUint16(12,0,true);
+        lh.setUint32(14,crc,true); lh.setUint32(18,size,true); lh.setUint32(22,size,true);
+        lh.setUint16(26,nb.length,true); lh.setUint16(28,0,true);
+        new Uint8Array(lh.buffer).set(nb,30);
+        localParts.push(new Uint8Array(lh.buffer),db);
+        centralDir.push({nb,crc,size,offset});
+        offset+=30+nb.length+size;
+      }
+      const cdParts=[], cdStart=offset;
+      for (const {nb,crc,size,offset:o} of centralDir) {
+        const cd=new DataView(new ArrayBuffer(46+nb.length));
+        cd.setUint32(0,0x02014b50,true); cd.setUint16(4,20,true); cd.setUint16(6,20,true);
+        cd.setUint16(8,0,true); cd.setUint16(10,0,true); cd.setUint16(12,0,true);
+        cd.setUint16(14,0,true); cd.setUint32(16,crc,true); cd.setUint32(20,size,true);
+        cd.setUint32(24,size,true); cd.setUint16(28,nb.length,true); cd.setUint16(30,0,true);
+        cd.setUint16(32,0,true); cd.setUint16(34,0,true); cd.setUint16(36,0,true);
+        cd.setUint32(38,0,true); cd.setUint32(42,o,true);
+        new Uint8Array(cd.buffer).set(nb,46);
+        cdParts.push(new Uint8Array(cd.buffer)); offset+=46+nb.length;
+      }
+      const cdSize=offset-cdStart;
+      const eocd=new DataView(new ArrayBuffer(22));
+      eocd.setUint32(0,0x06054b50,true); eocd.setUint16(4,0,true); eocd.setUint16(6,0,true);
+      eocd.setUint16(8,centralDir.length,true); eocd.setUint16(10,centralDir.length,true);
+      eocd.setUint32(12,cdSize,true); eocd.setUint32(16,cdStart,true); eocd.setUint16(20,0,true);
+      const allParts=[...localParts,...cdParts,new Uint8Array(eocd.buffer)];
+      const total=allParts.reduce((s,p)=>s+p.length,0);
+      const out=new Uint8Array(total); let pos=0;
+      for (const p of allParts){out.set(p,pos);pos+=p.length;}
+      return out;
+    }
+
+    const zip = makeZip([
+      ['[Content_Types].xml', contentTypes],
+      ['_rels/.rels', rels],
+      ['word/document.xml', documentXml],
+      ['word/styles.xml', stylesXml],
+      ['word/numbering.xml', numberingXml],
+      ['word/_rels/document.xml.rels', wordRels],
+    ]);
+
+    const blob = new Blob([zip], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'maternity-care-plan.docx';
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   function exportSummary() {
