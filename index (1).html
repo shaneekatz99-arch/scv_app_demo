@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Maternity Care Plan">
+  <meta name="theme-color" content="#1a6b6b">
+  <title>Values-Based Maternity Care Plan</title>
+  <!-- Inline SVG sprite — no CDN needed, works fully offline -->
+  <svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+    <symbol id="ico-flask" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M9 3h6"/>
+      <path d="M9 3v6l-4 8a1 1 0 0 0 .9 1.5h12.2a1 1 0 0 0 .9-1.5l-4-8V3"/>
+      <path d="M6.5 14.5h11"/>
+    </symbol>
+    <symbol id="ico-circle-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="9"/>
+      <line x1="12" y1="8" x2="12" y2="16"/>
+      <line x1="8" y1="12" x2="16" y2="12"/>
+    </symbol>
+    <symbol id="ico-vaccine" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 3L4 6.5v5c0 4.5 3.5 7.5 8 9 4.5-1.5 8-4.5 8-9v-5L12 3z"/>
+      <line x1="12" y1="8.5" x2="12" y2="15.5"/>
+      <line x1="8.5" y1="12" x2="15.5" y2="12"/>
+    </symbol>
+    <symbol id="ico-message-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 21a9 9 0 1 0-9-9c0 1.7.46 3.29 1.27 4.66L3 21l4.34-1.27A9 9 0 0 0 12 21z"/>
+    </symbol>
+    <symbol id="ico-chevron-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="6 9 12 15 18 9"/>
+    </symbol>
+    <symbol id="ico-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 5v10m0 0l-4-4m4 4l4-4"/>
+      <path d="M5 19h14"/>
+    </symbol>
+    <symbol id="ico-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="12" y1="5" x2="12" y2="19"/>
+      <line x1="5" y1="12" x2="19" y2="12"/>
+    </symbol>
+  </svg>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --teal: #1a6b6b;
+      --teal-alt: #2a7d8a;
+      --teal-light: #f0f9f6;
+      --text-primary: #1a1a1a;
+      --text-secondary: #5a5a5a;
+      --text-tertiary: #999;
+      --bg-primary: #ffffff;
+      --bg-secondary: #f7f7f5;
+      --border: rgba(0,0,0,0.12);
+      --border-mid: rgba(0,0,0,0.2);
+      --radius-md: 10px;
+      --radius-lg: 14px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --text-primary: #f0f0f0;
+        --text-secondary: #aaa;
+        --text-tertiary: #666;
+        --bg-primary: #1c1c1e;
+        --bg-secondary: #2c2c2e;
+        --border: rgba(255,255,255,0.12);
+        --border-mid: rgba(255,255,255,0.2);
+        --teal-light: #0d3535;
+      }
+    }
+
+    html, body {
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      -webkit-text-size-adjust: 100%;
+    }
+
+    .app { max-width: 430px; margin: 0 auto; min-height: 100%; background: var(--bg-secondary); }
+
+    /* Header */
+    .header { background: var(--teal); padding: 52px 18px 16px; color: white; position: sticky; top: 0; z-index: 50; }
+    .header h1 { font-size: 17px; font-weight: 600; letter-spacing: -0.3px; }
+    .header p { font-size: 12px; opacity: 0.75; margin-top: 2px; }
+    .progress-row { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+    .progress-bar { flex: 1; height: 3px; background: rgba(255,255,255,0.25); border-radius: 2px; overflow: hidden; }
+    .progress-fill { height: 100%; background: white; border-radius: 2px; transition: width 0.35s ease; }
+    .step-label { font-size: 11px; opacity: 0.65; white-space: nowrap; }
+
+    /* Nav tabs */
+    .nav-tabs { display: flex; overflow-x: auto; background: var(--bg-primary); border-bottom: 0.5px solid var(--border); scrollbar-width: none; position: sticky; top: 98px; z-index: 40; }
+    .nav-tabs::-webkit-scrollbar { display: none; }
+    .nav-tab { flex-shrink: 0; padding: 11px 15px; font-size: 13px; color: var(--text-secondary); cursor: pointer; border: none; border-bottom: 2px solid transparent; background: none; white-space: nowrap; font-family: inherit; transition: color 0.15s; }
+    .nav-tab.active { color: var(--teal); border-bottom-color: var(--teal); font-weight: 500; }
+
+    /* Sections */
+    .section { padding: 16px; display: none; padding-bottom: 100px; }
+    .section.active { display: block; }
+    .section-title { font-size: 20px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; letter-spacing: -0.4px; }
+    .section-subtitle { font-size: 13px; color: var(--text-secondary); margin-bottom: 20px; line-height: 1.55; }
+
+    /* Form elements */
+    .field-group { margin-bottom: 16px; }
+    .field-label { font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 7px; display: block; }
+    input[type="text"], textarea, select {
+      width: 100%; border: 0.5px solid var(--border-mid); border-radius: var(--radius-md);
+      padding: 11px 13px; font-size: 15px; font-family: inherit;
+      background: var(--bg-primary); color: var(--text-primary); resize: none;
+      -webkit-appearance: none; appearance: none; transition: border-color 0.15s;
+    }
+    input[type="text"]:focus, textarea:focus, select:focus { outline: none; border-color: var(--teal); }
+    textarea { min-height: 90px; line-height: 1.55; }
+    textarea.large { min-height: 115px; }
+
+    /* =====================
+       DESKTOP LAYOUT ≥ 768px
+       ===================== */
+    @media (min-width: 768px) {
+      body { background: var(--bg-secondary); }
+
+      .app {
+        max-width: 1100px;
+        display: grid;
+        grid-template-columns: 240px 1fr;
+        grid-template-rows: auto auto 1fr;
+        grid-template-areas:
+          "header  header"
+          "sidebar content";
+        min-height: 100vh;
+        box-shadow: 0 0 40px rgba(0,0,0,0.08);
+      }
+
+      /* Header spans full width */
+      .header {
+        grid-area: header;
+        padding: 24px 32px 20px;
+        position: static;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        gap: 0 24px;
+      }
+      .header h1 { font-size: 22px; }
+      .header p { font-size: 13px; }
+      .progress-row { grid-column: 1 / -1; margin-top: 14px; }
+
+      /* Sidebar nav */
+      .nav-tabs {
+        grid-area: sidebar;
+        flex-direction: column;
+        overflow-x: visible;
+        overflow-y: auto;
+        background: var(--bg-primary);
+        border-bottom: none;
+        border-right: 0.5px solid var(--border);
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        align-self: start;
+        padding: 20px 0 20px;
+      }
+      .nav-tab {
+        padding: 12px 24px;
+        font-size: 14px;
+        border-bottom: none;
+        border-left: 3px solid transparent;
+        border-right: none;
+        text-align: left;
+        width: 100%;
+      }
+      .nav-tab.active {
+        border-left-color: var(--teal);
+        border-bottom-color: transparent;
+        background: var(--teal-light);
+      }
+
+      /* Content area */
+      .section {
+        grid-area: content;
+        padding: 32px 36px 80px;
+        padding-bottom: 40px;
+      }
+      .section-title { font-size: 26px; margin-bottom: 6px; }
+      .section-subtitle { font-size: 14px; margin-bottom: 24px; }
+
+      /* Two-column field layout */
+      .field-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+      /* Wider inputs */
+      input[type="text"], textarea, select { font-size: 15px; padding: 12px 14px; }
+      textarea { min-height: 100px; }
+      textarea.large { min-height: 130px; }
+      .field-label { font-size: 12px; margin-bottom: 8px; }
+
+      /* Visit cards single column on desktop */
+      #visit-list { display: block; }
+      .visit-card { margin-bottom: 12px; }
+
+      /* Checkbox grid 4 cols on desktop */
+      .checkbox-grid { grid-template-columns: 1fr 1fr 1fr 1fr; }
+
+      /* Bottom nav becomes inline button row at top of content */
+      .bottom-nav {
+        position: static;
+        transform: none;
+        border-top: none;
+        border-bottom: 0.5px solid var(--border);
+        padding: 12px 36px;
+        background: var(--bg-primary);
+        grid-column: 2;
+        justify-content: flex-end;
+        gap: 10px;
+      }
+      .btn { flex: none; padding: 10px 24px; font-size: 14px; }
+      .btn-export { order: -1; margin-right: auto; }
+
+      /* BRAND box stays single column */
+      .brand-box { display: block; }
+      .brand-row { margin-bottom: 10px; }
+
+      .saved-badge { top: 20px; right: 24px; }
+
+      /* Accordion labels bigger */
+      .accordion-label { font-size: 14px; }
+      .test-list li { font-size: 14px; }
+      .visit-header h3 { font-size: 15px; }
+    }
+
+    /* Wide desktop ≥ 1100px — slightly more breathing room */
+    @media (min-width: 1100px) {
+      .app { max-width: 1200px; grid-template-columns: 260px 1fr; }
+      .section { padding: 36px 48px 48px; }
+      .bottom-nav { padding: 12px 48px; }
+    }
+
+    /* Checkboxes */
+    .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .checkbox-item { display: flex; align-items: flex-start; gap: 9px; padding: 11px 10px; border: 0.5px solid var(--border); border-radius: var(--radius-md); cursor: pointer; background: var(--bg-primary); transition: border-color 0.15s, background 0.15s; -webkit-tap-highlight-color: transparent; }
+    .checkbox-item input[type="checkbox"] { width: 17px; height: 17px; margin-top: 1px; flex-shrink: 0; accent-color: var(--teal); cursor: pointer; }
+    .checkbox-item label { font-size: 13px; color: var(--text-primary); cursor: pointer; line-height: 1.4; }
+    .checkbox-item.checked { border-color: var(--teal); background: var(--teal-light); }
+
+    /* Visit cards */
+    .visit-card { border: 0.5px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 12px; background: var(--bg-primary); }
+    .visit-header { background: var(--teal); padding: 11px 15px; display: flex; justify-content: space-between; align-items: center; }
+    .visit-header h3 { font-size: 14px; font-weight: 600; color: white; }
+    .visit-header span { font-size: 11px; color: rgba(255,255,255,0.7); }
+    .visit-card.additional .visit-header { background: var(--teal-alt); }
+    .visit-header-right { display: flex; align-items: center; gap: 8px; }
+    .visit-remove-btn { background: rgba(255,255,255,0.2); border: none; color: white; width: 20px; height: 20px; border-radius: 50%; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; font-family: inherit; flex-shrink: 0; }
+    .visit-remove-btn:hover { background: rgba(255,255,255,0.35); }
+    .additional-badge { font-size: 10px; background: rgba(255,255,255,0.22); color: white; padding: 2px 7px; border-radius: 10px; letter-spacing: 0.03em; }
+    .visit-body { padding: 14px 15px; }
+
+    /* Accordions */
+    .accordion { border: 0.5px solid var(--border); border-radius: var(--radius-md); margin-bottom: 10px; overflow: hidden; }
+    .accordion-trigger { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: var(--bg-secondary); border: none; cursor: pointer; font-family: inherit; -webkit-tap-highlight-color: transparent; }
+    .accordion-trigger-left { display: flex; align-items: center; gap: 8px; }
+    .accordion-trigger-left svg { color: var(--teal); }
+    .accordion-label { font-size: 13px; font-weight: 500; color: var(--text-primary); text-align: left; }
+    .accordion-chevron { color: var(--text-tertiary); transition: transform 0.2s ease; flex-shrink: 0; }
+    .accordion-trigger.open .accordion-chevron { transform: rotate(180deg); }
+    .accordion-body { display: none; padding: 10px 13px; border-top: 0.5px solid var(--border); background: var(--bg-primary); }
+    .accordion-body.open { display: block; }
+    .test-list { list-style: none; }
+    .test-list li { font-size: 13px; color: var(--text-secondary); padding: 4px 0 4px 14px; position: relative; line-height: 1.5; }
+    .test-list li::before { content: "·"; position: absolute; left: 3px; color: var(--teal); font-weight: 700; font-size: 16px; line-height: 1.2; }
+
+    /* Discussed with row */
+    .discussed-row { display: flex; gap: 8px; margin-top: 4px; }
+    .discussed-row input { flex: 2; }
+    .discussed-row input:last-child { flex: 1; }
+
+    /* BRAND box */
+    .brand-box { border: 0.5px solid var(--border); border-radius: var(--radius-md); padding: 12px 13px; margin-bottom: 20px; background: var(--bg-primary); }
+    .brand-row { display: flex; gap: 11px; align-items: flex-start; margin-bottom: 10px; }
+    .brand-row:last-child { margin-bottom: 0; }
+    .brand-letter { width: 24px; height: 24px; border-radius: 50%; background: var(--teal); color: white; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; flex-shrink: 0; margin-top: 1px; }
+    .brand-text { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+    .brand-text strong { color: var(--text-primary); font-weight: 600; }
+
+    /* Add visit bar */
+    .add-visit-bar { margin-top: 4px; padding: 12px; border: 0.5px dashed var(--border-mid); border-radius: var(--radius-lg); background: var(--bg-secondary); }
+    .add-visit-label { font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; display: block; }
+    .add-visit-row { display: flex; gap: 8px; }
+    .add-visit-row select { flex: 1; height: 42px; padding: 0 12px; font-size: 14px; }
+    .add-visit-btn { height: 42px; padding: 0 16px; border-radius: var(--radius-md); background: var(--teal); color: white; border: none; font-size: 14px; font-weight: 500; cursor: pointer; white-space: nowrap; font-family: inherit; display: flex; align-items: center; gap: 5px; flex-shrink: 0; -webkit-tap-highlight-color: transparent; }
+    .add-visit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .add-visit-hint { font-size: 12px; color: var(--text-tertiary); margin-top: 8px; line-height: 1.4; }
+
+    /* Bottom nav — mobile fixed, desktop inline */
+    .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 430px; background: var(--bg-primary); border-top: 0.5px solid var(--border); padding: 10px 16px; padding-bottom: max(10px, env(safe-area-inset-bottom)); display: flex; gap: 8px; z-index: 60; }
+    .btn { flex: 1; padding: 12px; border-radius: var(--radius-md); font-size: 14px; font-weight: 500; cursor: pointer; border: 0.5px solid var(--border-mid); background: var(--bg-primary); color: var(--text-primary); font-family: inherit; -webkit-tap-highlight-color: transparent; transition: opacity 0.15s; }
+    .btn:active { opacity: 0.75; }
+    .btn-primary { background: var(--teal); color: white; border-color: var(--teal); }
+    .btn-export { background: var(--bg-secondary); font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 5px; }
+
+    /* Saved badge */
+    .saved-badge { display: none; position: fixed; top: 14px; right: 14px; background: var(--teal); color: white; font-size: 12px; padding: 6px 13px; border-radius: 20px; z-index: 100; font-family: inherit; }
+
+    /* Slide-in */
+    @keyframes slideIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+    .visit-card.new { animation: slideIn 0.22s ease forwards; }
+
+    .mt-12 { margin-top: 12px; }
+    .mt-16 { margin-top: 16px; }
+  </style>
+</head>
+<body>
+<div class="app" id="app">
+
+  <div class="header">
+    <h1>Values-based maternity care plan</h1>
+    <p>Bring this to every appointment</p>
+    <div class="progress-row">
+      <div class="progress-bar"><div class="progress-fill" id="progress" style="width:17%"></div></div>
+      <span class="step-label" id="step-label">1 of 6</span>
+    </div>
+  </div>
+
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="goTo(0)">About me</button>
+    <button class="nav-tab" onclick="goTo(1)">What matters</button>
+    <button class="nav-tab" onclick="goTo(2)">Booking</button>
+    <button class="nav-tab" onclick="goTo(3)">Antenatal</button>
+    <button class="nav-tab" onclick="goTo(4)">Labour</button>
+    <button class="nav-tab" onclick="goTo(5)">Postnatal</button>
+  </div>
+
+  <!-- ABOUT ME -->
+  <div id="section-0" class="section active">
+    <p class="section-title">About me</p>
+    <p class="section-subtitle">Fill this in on your own, with your support person, or together with your midwife or doctor.</p>
+    <div class="field-row-2">
+      <div class="field-group"><label class="field-label">My name</label><input type="text" id="name" placeholder="Your name" oninput="save()"></div>
+      <div class="field-group"><label class="field-label">My pronouns</label><input type="text" id="pronouns" placeholder="e.g. she/her, they/them" oninput="save()"></div>
+    </div>
+    <div class="field-group"><label class="field-label">My support person/s</label><input type="text" id="support" placeholder="Name/s" oninput="save()"></div>
+    <div class="field-group"><label class="field-label">My care team</label><input type="text" id="careteam" placeholder="GP, obstetrician, midwife, etc." oninput="save()"></div>
+    <p class="section-title mt-16" style="font-size:16px; margin-bottom:8px;">Questions to ask — BRAND</p>
+    <div class="brand-box">
+      <div class="brand-row"><div class="brand-letter">B</div><div class="brand-text"><strong>Benefits</strong> — What are the benefits of this?</div></div>
+      <div class="brand-row"><div class="brand-letter">R</div><div class="brand-text"><strong>Risks</strong> — What are the risks?</div></div>
+      <div class="brand-row"><div class="brand-letter">A</div><div class="brand-text"><strong>Alternatives</strong> — What other options do I have?</div></div>
+      <div class="brand-row"><div class="brand-letter">N</div><div class="brand-text"><strong>Now or nothing</strong> — Does this need to happen now?</div></div>
+      <div class="brand-row"><div class="brand-letter">D</div><div class="brand-text"><strong>Decision</strong> — The final decision is mine.</div></div>
+    </div>
+  </div>
+
+  <!-- WHAT MATTERS -->
+  <div id="section-1" class="section">
+    <p class="section-title">What matters to me</p>
+    <p class="section-subtitle">Tick any that feel important, then describe what matters in your own words.</p>
+    <div class="checkbox-grid">
+      <div class="checkbox-item" onclick="toggleCheck(this,'cb1')"><input type="checkbox" id="cb1"><label for="cb1">Feeling in control</label></div>
+      <div class="checkbox-item" onclick="toggleCheck(this,'cb2')"><input type="checkbox" id="cb2"><label for="cb2">Knowing my care providers</label></div>
+      <div class="checkbox-item" onclick="toggleCheck(this,'cb3')"><input type="checkbox" id="cb3"><label for="cb3">Having my decisions listened to and respected</label></div>
+      <div class="checkbox-item" onclick="toggleCheck(this,'cb4')"><input type="checkbox" id="cb4"><label for="cb4">Including my family in my care</label></div>
+      <div class="checkbox-item" onclick="toggleCheck(this,'cb5')"><input type="checkbox" id="cb5"><label for="cb5">Managing pain in a way that's right for me</label></div>
+      <div class="checkbox-item" onclick="toggleCheck(this,'cb6')"><input type="checkbox" id="cb6"><label for="cb6">Access to antenatal education</label></div>
+      <div class="checkbox-item" onclick="toggleCheck(this,'cb7')"><input type="checkbox" id="cb7"><label for="cb7">Including cultural or spiritual practices</label></div>
+      <div class="checkbox-item" onclick="toggleCheck(this,'cb8')"><input type="checkbox" id="cb8"><label for="cb8">Privacy and dignity at all times</label></div>
+      <div class="checkbox-item" onclick="toggleCheck(this,'cb9')"><input type="checkbox" id="cb9"><label for="cb9">Proactive discussions about my birth and labour</label></div>
+      <div class="checkbox-item" onclick="toggleCheck(this,'cb10')"><input type="checkbox" id="cb10"><label for="cb10">Developing a comprehensive birth plan</label></div>
+    </div>
+    <div class="field-group mt-16"><label class="field-label">In my own words, what matters to me is:</label><textarea id="matters-text" class="large" placeholder="Write freely here..." oninput="save()"></textarea></div>
+  </div>
+
+  <!-- BOOKING -->
+  <div id="section-2" class="section">
+    <p class="section-title">Booking visit</p>
+    <p class="section-subtitle">First trimester — full medical history and tailored care plan.</p>
+    <div class="visit-card">
+      <div class="visit-header"><h3>Booking visit</h3><span>First trimester</span></div>
+      <div class="visit-body">
+        <div class="accordion"><button class="accordion-trigger" onclick="toggleAccordion(this)"><div class="accordion-trigger-left"><svg class="icon" width="16" height="16"><use href="#ico-flask"/></svg><span class="accordion-label">Recommended tests</span></div><svg class="icon accordion-chevron" width="16" height="16"><use href="#ico-chevron-down"/></svg></button><div class="accordion-body"><ul class="test-list"><li>Blood group and antibody screen</li><li>Full blood count</li><li>Urine test</li><li>Infections in pregnancy — syphilis, HIV, Hepatitis B, Hepatitis C, Rubella</li></ul></div></div>
+        <div class="accordion"><button class="accordion-trigger" onclick="toggleAccordion(this)"><div class="accordion-trigger-left"><svg class="icon" width="16" height="16"><use href="#ico-circle-plus"/></svg><span class="accordion-label">Additional tests that may be offered</span></div><svg class="icon accordion-chevron" width="16" height="16"><use href="#ico-chevron-down"/></svg></button><div class="accordion-body"><ul class="test-list"><li>Iron levels</li><li>Early diabetes testing</li><li>Thyroid function</li><li>CMV and varicella antibodies</li><li>Dating ultrasound</li><li>Cervical screening</li><li>Genetic testing — NIPT, combined first trimester screening</li></ul></div></div>
+        <div class="field-group mt-12"><label class="field-label">My medical history</label><textarea id="booking-history" placeholder="Previous pregnancies, conditions, surgeries..." oninput="save()"></textarea></div>
+        <div class="field-group"><label class="field-label">What's important to me at this time</label><textarea id="booking-important" placeholder="How you're feeling, what matters most right now..." oninput="save()"></textarea></div>
+        <div class="field-group"><label class="field-label">Questions for my healthcare provider</label><textarea id="booking-questions" placeholder="Write your questions here..." oninput="save()"></textarea></div>
+        <label class="field-label">Discussed with / on date</label>
+        <div class="discussed-row"><input type="text" id="booking-with" placeholder="Provider name" oninput="save()"><input type="text" id="booking-date" placeholder="Date" oninput="save()"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ANTENATAL -->
+  <div id="section-3" class="section">
+    <p class="section-title">Antenatal visits</p>
+    <p class="section-subtitle">Raise your birth, labour, and postnatal preferences at every visit.</p>
+
+    <div id="visit-list">
+
+      <!-- 20 weeks -->
+      <div class="visit-card" data-week="20">
+        <div class="visit-header"><h3>20–22 week visit</h3><span>Second trimester</span></div>
+        <div class="visit-body">
+          <div class="accordion"><button class="accordion-trigger" onclick="toggleAccordion(this)"><div class="accordion-trigger-left"><svg class="icon" width="16" height="16"><use href="#ico-flask"/></svg><span class="accordion-label">Recommended tests</span></div><svg class="icon accordion-chevron" width="16" height="16"><use href="#ico-chevron-down"/></svg></button><div class="accordion-body"><ul class="test-list"><li>Morphology ultrasound — a detailed check of your baby's development, position, the placenta and cervix</li></ul></div></div>
+          <div class="accordion"><button class="accordion-trigger" onclick="toggleAccordion(this)"><div class="accordion-trigger-left"><svg class="icon" width="16" height="16"><use href="#ico-vaccine"/></svg><span class="accordion-label">Routinely offered treatments</span></div><svg class="icon accordion-chevron" width="16" height="16"><use href="#ico-chevron-down"/></svg></button><div class="accordion-body"><ul class="test-list"><li>Whooping cough vaccine (20–32 weeks)</li><li>RSV vaccine (offered 28–32 weeks)</li><li>Influenza vaccine (offered any time during pregnancy)</li></ul></div></div>
+          <div class="field-group mt-12"><label class="field-label">What's important to me at this time</label><textarea id="w20-important" oninput="save()"></textarea></div>
+          <div class="field-group"><label class="field-label">Questions for my provider</label><textarea id="w20-questions" oninput="save()"></textarea></div>
+          <label class="field-label">Discussed with / on date</label>
+          <div class="discussed-row"><input type="text" id="w20-with" placeholder="Provider name" oninput="save()"><input type="text" id="w20-date" placeholder="Date" oninput="save()"></div>
+        </div>
+      </div>
+
+      <!-- 28 weeks -->
+      <div class="visit-card" data-week="28">
+        <div class="visit-header"><h3>28–30 week visit</h3><span>Third trimester</span></div>
+        <div class="visit-body">
+          <div class="accordion"><button class="accordion-trigger" onclick="toggleAccordion(this)"><div class="accordion-trigger-left"><svg class="icon" width="16" height="16"><use href="#ico-flask"/></svg><span class="accordion-label">Recommended tests</span></div><svg class="icon accordion-chevron" width="16" height="16"><use href="#ico-chevron-down"/></svg></button><div class="accordion-body"><ul class="test-list"><li>Repeat blood counts</li><li>Blood group and antibodies</li><li>Syphilis serology</li><li>Oral glucose tolerance test (diabetes check)</li></ul></div></div>
+          <div class="accordion"><button class="accordion-trigger" onclick="toggleAccordion(this)"><div class="accordion-trigger-left"><svg class="icon" width="16" height="16"><use href="#ico-vaccine"/></svg><span class="accordion-label">Routinely offered treatments</span></div><svg class="icon accordion-chevron" width="16" height="16"><use href="#ico-chevron-down"/></svg></button><div class="accordion-body"><ul class="test-list"><li>Whooping cough vaccine (20–32 weeks)</li><li>RSV vaccine (28–32 weeks)</li><li>Influenza vaccine (any time)</li><li>Anti-D injection</li></ul></div></div>
+          <div class="accordion"><button class="accordion-trigger" onclick="toggleAccordion(this)"><div class="accordion-trigger-left"><svg class="icon" width="16" height="16"><use href="#ico-circle-plus"/></svg><span class="accordion-label">Additional tests that may be offered</span></div><svg class="icon accordion-chevron" width="16" height="16"><use href="#ico-chevron-down"/></svg></button><div class="accordion-body"><ul class="test-list"><li>STI screening — chlamydia, gonorrhoea</li><li>Iron stores</li><li>Growth ultrasound (may be offered 28–32 weeks)</li></ul></div></div>
+          <div class="field-group mt-12"><label class="field-label">What's important to me at this time</label><textarea id="w28-important" oninput="save()"></textarea></div>
+          <div class="field-group"><label class="field-label">Questions for my provider</label><textarea id="w28-questions" oninput="save()"></textarea></div>
+          <label class="field-label">Discussed with / on date</label>
+          <div class="discussed-row"><input type="text" id="w28-with" placeholder="Provider name" oninput="save()"><input type="text" id="w28-date" placeholder="Date" oninput="save()"></div>
+        </div>
+      </div>
+
+      <!-- 32-34 weeks -->
+      <div class="visit-card" data-week="32">
+        <div class="visit-header"><h3>32–34 week visit</h3><span>Third trimester</span></div>
+        <div class="visit-body">
+          <div class="accordion"><button class="accordion-trigger" onclick="toggleAccordion(this)"><div class="accordion-trigger-left"><svg class="icon" width="16" height="16"><use href="#ico-message-circle"/></svg><span class="accordion-label">Important conversations at this time</span></div><svg class="icon accordion-chevron" width="16" height="16"><use href="#ico-chevron-down"/></svg></button><div class="accordion-body"><ul class="test-list"><li>Labour signs and preparing for birth</li><li>Sleep quality</li><li>Social and emotional wellbeing</li><li>Breastfeeding and alternatives</li></ul></div></div>
+          <div class="field-group mt-12"><label class="field-label">What's important to me at this time</label><textarea id="w32-important" oninput="save()"></textarea></div>
+          <div class="field-group"><label class="field-label">Questions for my provider</label><textarea id="w32-questions" oninput="save()"></textarea></div>
+          <label class="field-label">Discussed with / on date</label>
+          <div class="discussed-row"><input type="text" id="w32-with" placeholder="Provider name" oninput="save()"><input type="text" id="w32-date" placeholder="Date" oninput="save()"></div>
+        </div>
+      </div>
+
+      <!-- 36 weeks -->
+      <div class="visit-card" data-week="36">
+        <div class="visit-header"><h3>36 week visit</h3><span>Third trimester</span></div>
+        <div class="visit-body">
+          <div class="accordion"><button class="accordion-trigger" onclick="toggleAccordion(this)"><div class="accordion-trigger-left"><svg class="icon" width="16" height="16"><use href="#ico-flask"/></svg><span class="accordion-label">Recommended tests</span></div><svg class="icon accordion-chevron" width="16" height="16"><use href="#ico-chevron-down"/></svg></button><div class="accordion-body"><ul class="test-list"><li>Repeat blood counts</li><li>Group B streptococcus swab</li></ul></div></div>
+          <div class="accordion"><button class="accordion-trigger" onclick="toggleAccordion(this)"><div class="accordion-trigger-left"><svg class="icon" width="16" height="16"><use href="#ico-circle-plus"/></svg><span class="accordion-label">Additional tests that may be offered</span></div><svg class="icon accordion-chevron" width="16" height="16"><use href="#ico-chevron-down"/></svg></button><div class="accordion-body"><ul class="test-list"><li>Growth ultrasound (usually 32–36 weeks, based on risk factors)</li><li>Iron stores</li></ul></div></div>
+          <div class="field-group mt-12"><label class="field-label">What's important to me at this time</label><textarea id="w36-important" oninput="save()"></textarea></div>
+          <div class="field-group"><label class="field-label">Questions for my provider</label><textarea id="w36-questions" oninput="save()"></textarea></div>
+          <label class="field-label">Discussed with / on date</label>
+          <div class="discussed-row"><input type="text" id="w36-with" placeholder="Provider name" oninput="save()"><input type="text" id="w36-date" placeholder="Date" oninput="save()"></div>
+        </div>
+      </div>
+
+      <!-- 40 weeks -->
+      <div class="visit-card" data-week="40">
+        <div class="visit-header"><h3>40 week visit</h3><span>Third trimester</span></div>
+        <div class="visit-body">
+          <div class="accordion"><button class="accordion-trigger" onclick="toggleAccordion(this)"><div class="accordion-trigger-left"><svg class="icon" width="16" height="16"><use href="#ico-message-circle"/></svg><span class="accordion-label">Common discussions at this visit</span></div><svg class="icon accordion-chevron" width="16" height="16"><use href="#ico-chevron-down"/></svg></button><div class="accordion-body"><ul class="test-list"><li>Induction of labour options if pregnancy continues past your due date</li><li>Checking your baby's wellbeing</li></ul></div></div>
+          <div class="field-group mt-12"><label class="field-label">What's important to me at this time</label><textarea id="w40-important" oninput="save()"></textarea></div>
+          <div class="field-group"><label class="field-label">Questions for my provider</label><textarea id="w40-questions" oninput="save()"></textarea></div>
+          <label class="field-label">Discussed with / on date</label>
+          <div class="discussed-row"><input type="text" id="w40-with" placeholder="Provider name" oninput="save()"><input type="text" id="w40-date" placeholder="Date" oninput="save()"></div>
+        </div>
+      </div>
+
+    </div><!-- end #visit-list -->
+
+    <!-- Add visit bar -->
+    <div class="add-visit-bar">
+      <span class="add-visit-label">Add an additional visit</span>
+      <div class="add-visit-row">
+        <select id="visit-select">
+          <option value="" disabled selected>Select week…</option>
+          <option value="23">23 week visit</option>
+          <option value="24">24 week visit</option>
+          <option value="25">25 week visit</option>
+          <option value="26">26 week visit</option>
+          <option value="27">27 week visit</option>
+          <option value="29">29 week visit</option>
+          <option value="30">30 week visit</option>
+          <option value="31">31 week visit</option>
+          <option value="33">33 week visit</option>
+          <option value="34">34 week visit</option>
+          <option value="35">35 week visit</option>
+          <option value="37">37 week visit</option>
+          <option value="38">38 week visit</option>
+          <option value="39">39 week visit</option>
+          <option value="41">41 week visit</option>
+          <option value="42">42 week visit</option>
+        </select>
+        <button class="add-visit-btn" onclick="addVisit()" id="add-visit-btn" disabled>
+          <svg class="icon" width="16" height="16"><use href="#ico-plus"/></svg> Add
+        </button>
+      </div>
+      <p class="add-visit-hint">Use this to record any visits outside the standard schedule.</p>
+    </div>
+  </div><!-- end section-3 -->
+
+  <!-- LABOUR -->
+  <div id="section-4" class="section">
+    <p class="section-title">Labour and birth</p>
+    <p class="section-subtitle">Think about who you want with you and what you'd like discussed before labour begins.</p>
+    <div class="accordion" style="margin-bottom:14px;"><button class="accordion-trigger" onclick="toggleAccordion(this)"><div class="accordion-trigger-left"><svg class="icon" width="16" height="16"><use href="#ico-message-circle"/></svg><span class="accordion-label">Common considerations during labour</span></div><svg class="icon accordion-chevron" width="16" height="16"><use href="#ico-chevron-down"/></svg></button><div class="accordion-body"><ul class="test-list"><li>Monitoring your baby's heartbeat</li><li>Internal examinations</li><li>Antibiotics if needed</li><li>Assistance with the birth if required</li><li>Pain relief options</li></ul></div></div>
+    <div class="field-group"><label class="field-label">Who I want with me during labour</label><textarea id="labour-who" placeholder="Names and roles..." oninput="save()"></textarea></div>
+    <div class="field-group"><label class="field-label">What's important to me during labour and birth</label><textarea id="labour-important" class="large" placeholder="Pain management, monitoring preferences, environment..." oninput="save()"></textarea></div>
+    <div class="field-group"><label class="field-label">How I want people to communicate with me during labour</label><textarea id="labour-comms" placeholder="e.g. preferred language, whether I need an interpreter, how I'd like information given while in pain or during procedures, whether my support person can speak on my behalf..." oninput="save()"></textarea></div>
+    <div class="field-group"><label class="field-label">Procedures or decisions I'd like to discuss beforehand</label><textarea id="labour-procedures" placeholder="e.g. episiotomy, assisted delivery, induction..." oninput="save()"></textarea></div>
+    <div class="field-group"><label class="field-label">Questions or requests for my healthcare provider</label><textarea id="labour-questions" oninput="save()"></textarea></div>
+    <label class="field-label">Discussed with / on date</label>
+    <div class="discussed-row"><input type="text" id="labour-with" placeholder="Provider name" oninput="save()"><input type="text" id="labour-date" placeholder="Date" oninput="save()"></div>
+  </div>
+
+  <!-- POSTNATAL -->
+  <div id="section-5" class="section">
+    <p class="section-title">Postnatal care</p>
+    <p class="section-subtitle">After the birth.</p>
+    <div class="visit-card">
+      <div class="visit-header"><h3>Immediately after birth</h3><span>Minutes to hours</span></div>
+      <div class="visit-body">
+        <div class="accordion"><button class="accordion-trigger" onclick="toggleAccordion(this)"><div class="accordion-trigger-left"><svg class="icon" width="16" height="16"><use href="#ico-message-circle"/></svg><span class="accordion-label">Things to consider</span></div><svg class="icon accordion-chevron" width="16" height="16"><use href="#ico-chevron-down"/></svg></button><div class="accordion-body"><ul class="test-list"><li>Skin-to-skin contact</li><li>Time alone with your baby</li><li>How you plan to feed your baby</li><li>Newborn vaccinations — Hepatitis B and Vitamin K</li><li>Having your partner or support person with you</li></ul></div></div>
+        <div class="field-group mt-12"><label class="field-label">What's important to me in these first moments</label><textarea id="post-moments" oninput="save()"></textarea></div>
+        <div class="field-group"><label class="field-label">Questions or requests</label><textarea id="post-moments-q" oninput="save()"></textarea></div>
+      </div>
+    </div>
+    <div class="visit-card">
+      <div class="visit-header"><h3>First days after birth</h3><span></span></div>
+      <div class="visit-body">
+        <div class="accordion"><button class="accordion-trigger" onclick="toggleAccordion(this)"><div class="accordion-trigger-left"><svg class="icon" width="16" height="16"><use href="#ico-message-circle"/></svg><span class="accordion-label">Things to consider</span></div><svg class="icon accordion-chevron" width="16" height="16"><use href="#ico-chevron-down"/></svg></button><div class="accordion-body"><ul class="test-list"><li>Visiting arrangements for your partner and family</li><li>Going home planning</li><li>Mental health and emotional wellbeing care plan</li></ul></div></div>
+        <div class="field-group mt-12"><label class="field-label">What's important to me in the first days</label><textarea id="post-days" oninput="save()"></textarea></div>
+        <div class="field-group"><label class="field-label">Questions or requests</label><textarea id="post-days-q" oninput="save()"></textarea></div>
+      </div>
+    </div>
+    <div class="visit-card">
+      <div class="visit-header"><h3>Going home</h3><span>First weeks to months</span></div>
+      <div class="visit-body">
+        <div class="accordion"><button class="accordion-trigger" onclick="toggleAccordion(this)"><div class="accordion-trigger-left"><svg class="icon" width="16" height="16"><use href="#ico-message-circle"/></svg><span class="accordion-label">Things to consider</span></div><svg class="icon accordion-chevron" width="16" height="16"><use href="#ico-chevron-down"/></svg></button><div class="accordion-body"><ul class="test-list"><li>Managing at home and who is available to support you</li><li>Feeding support</li><li>Ongoing mental health care</li><li>Follow-up appointments for you and your baby</li></ul></div></div>
+        <div class="field-group mt-12"><label class="field-label">What's important to me as I settle home</label><textarea id="post-home" oninput="save()"></textarea></div>
+        <div class="field-group"><label class="field-label">Questions or requests</label><textarea id="post-home-q" oninput="save()"></textarea></div>
+      </div>
+    </div>
+    <label class="field-label" style="display:block; margin-top:4px;">Discussed with / on date</label>
+    <div class="discussed-row"><input type="text" id="post-with" placeholder="Provider name" oninput="save()"><input type="text" id="post-date" placeholder="Date" oninput="save()"></div>
+  </div>
+
+  <div class="bottom-nav">
+    <button class="btn" id="btn-back" onclick="prev()" style="display:none">← Back</button>
+    <button class="btn btn-export" onclick="exportSummary()"><svg class="icon" width="16" height="16"><use href="#ico-download"/></svg> Export summary</button>
+    <button class="btn btn-primary" id="btn-next" onclick="next()">Next →</button>
+  </div>
+
+</div>
+<div class="saved-badge" id="saved-badge">✓ Saved</div>
+
+<script>
+  let current = 0;
+  const total = 6;
+  let saveTimer;
+  const addedWeeks = new Set();
+
+  function trimesterFor(w) {
+    if (w < 14) return 'First trimester';
+    if (w < 28) return 'Second trimester';
+    return 'Third trimester';
+  }
+
+  document.getElementById('visit-select').addEventListener('change', function() {
+    const w = parseInt(this.value);
+    document.getElementById('add-visit-btn').disabled = !w || addedWeeks.has(w);
+  });
+
+  function addVisit() {
+    const sel = document.getElementById('visit-select');
+    const week = parseInt(sel.value);
+    if (!week || addedWeeks.has(week)) return;
+    addedWeeks.add(week);
+
+    const id = 'av' + week;
+    const label = week + ' week visit';
+    const trimester = trimesterFor(week);
+
+    const card = document.createElement('div');
+    card.className = 'visit-card additional new';
+    card.dataset.week = week;
+    card.id = 'card-' + id;
+    card.innerHTML = `
+      <div class="visit-header">
+        <h3>${label}</h3>
+        <div class="visit-header-right">
+          <span class="additional-badge">Additional</span>
+          <span>${trimester}</span>
+          <button class="visit-remove-btn" onclick="removeVisit(${week},'${id}')" title="Remove">✕</button>
+        </div>
+      </div>
+      <div class="visit-body">
+        <div class="field-group"><label class="field-label">What's important to me at this time</label><textarea id="${id}-important" oninput="save()"></textarea></div>
+        <div class="field-group"><label class="field-label">Questions for my provider</label><textarea id="${id}-questions" oninput="save()"></textarea></div>
+        <label class="field-label">Discussed with / on date</label>
+        <div class="discussed-row">
+          <input type="text" id="${id}-with" placeholder="Provider name" oninput="save()">
+          <input type="text" id="${id}-date" placeholder="Date" oninput="save()">
+        </div>
+      </div>`;
+
+    const list = document.getElementById('visit-list');
+    const allCards = [...list.querySelectorAll('.visit-card[data-week]')];
+    let inserted = false;
+    for (const existing of allCards) {
+      if (week < parseInt(existing.dataset.week)) {
+        list.insertBefore(card, existing);
+        inserted = true;
+        break;
+      }
+    }
+    if (!inserted) list.appendChild(card);
+
+    setTimeout(() => card.classList.remove('new'), 300);
+
+    const opt = sel.querySelector(`option[value="${week}"]`);
+    if (opt) { opt.text = opt.text + ' ✓'; opt.disabled = true; }
+    sel.value = '';
+    document.getElementById('add-visit-btn').disabled = true;
+    save();
+    card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function removeVisit(week, id) {
+    const card = document.getElementById('card-' + id);
+    if (card) card.remove();
+    addedWeeks.delete(week);
+    const sel = document.getElementById('visit-select');
+    const opt = sel.querySelector(`option[value="${week}"]`);
+    if (opt) { opt.text = week + ' week visit'; opt.disabled = false; }
+    save();
+  }
+
+  function goTo(idx) {
+    document.getElementById('section-' + current).classList.remove('active');
+    document.querySelectorAll('.nav-tab')[current].classList.remove('active');
+    current = idx;
+    document.getElementById('section-' + current).classList.add('active');
+    document.querySelectorAll('.nav-tab')[current].classList.add('active');
+    document.getElementById('progress').style.width = Math.round(((current + 1) / total) * 100) + '%';
+    document.getElementById('step-label').textContent = (current + 1) + ' of ' + total;
+    const backBtn = document.getElementById('btn-back');
+    backBtn.style.display = current === 0 ? 'none' : '';
+    document.getElementById('btn-next').textContent = current === total - 1 ? 'Done ✓' : 'Next →';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function next() { if (current < total - 1) goTo(current + 1); }
+  function prev() { if (current > 0) goTo(current - 1); }
+
+  function toggleCheck(el, id) {
+    const cb = document.getElementById(id);
+    cb.checked = !cb.checked;
+    el.classList.toggle('checked', cb.checked);
+    save();
+  }
+
+  function toggleAccordion(trigger) {
+    const body = trigger.nextElementSibling;
+    const isOpen = body.classList.contains('open');
+    body.classList.toggle('open', !isOpen);
+    trigger.classList.toggle('open', !isOpen);
+  }
+
+  function save() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      const badge = document.getElementById('saved-badge');
+      badge.style.display = 'block';
+      setTimeout(() => { badge.style.display = 'none'; }, 1400);
+    }, 500);
+  }
+
+  function exportSummary() {
+    const get = id => { const el = document.getElementById(id); return el ? el.value : ''; };
+    const checkboxLabels = ['Feeling in control','Knowing my care providers','Having my decisions listened to and respected','Including my family in my care','Managing pain in a way that\'s right for me','Access to antenatal education','Including cultural or spiritual practices','Privacy and dignity at all times','Proactive discussions about my birth and labour','Developing a comprehensive birth plan'];
+    const ticked = checkboxLabels.filter((_, i) => document.getElementById('cb' + (i + 1)).checked);
+
+    let text = 'VALUES-BASED MATERNITY CARE PLAN\n================================\n\n';
+
+    const writeSection = (heading, fields) => {
+      const hasContent = fields.some(([, v]) => v && v.trim());
+      if (!hasContent) return;
+      text += heading + '\n' + '-'.repeat(heading.length) + '\n';
+      for (const [label, val] of fields) {
+        if (val && val.trim()) text += label + ':\n' + val.trim() + '\n\n';
+      }
+    };
+
+    writeSection('ABOUT ME', [['Name', get('name')], ['Pronouns', get('pronouns')], ['Support person/s', get('support')], ['Care team', get('careteam')]]);
+    writeSection('WHAT MATTERS TO ME', [...(ticked.length ? [['Priorities', ticked.map(t => '• ' + t).join('\n')]] : []), ['In my own words', get('matters-text')]]);
+    writeSection('BOOKING VISIT', [['Medical history', get('booking-history')], ['What matters', get('booking-important')], ['Questions', get('booking-questions')], ['Discussed with', get('booking-with') + (get('booking-date') ? ' on ' + get('booking-date') : '')]]);
+
+    const stdWeekIds = { 20: 'w20', 28: 'w28', 32: 'w32', 36: 'w36', 40: 'w40' };
+    const allCards = [...document.getElementById('visit-list').querySelectorAll('.visit-card[data-week]')];
+    for (const card of allCards) {
+      const w = parseInt(card.dataset.week);
+      const isAdditional = card.classList.contains('additional');
+      const visitLabels = { 20: '20–22 WEEK VISIT', 28: '28–30 WEEK VISIT', 32: '32–34 WEEK VISIT', 36: '36 WEEK VISIT', 40: '40 WEEK VISIT' };
+      const heading = isAdditional ? (w + ' WEEK VISIT (Additional)') : (visitLabels[w] || (w + ' WEEK VISIT'));
+      let fields;
+      if (!isAdditional) {
+        const pid = stdWeekIds[w];
+        fields = [['What matters', get(pid + '-important')], ['Questions', get(pid + '-questions')], ['Discussed with', get(pid + '-with') + (get(pid + '-date') ? ' on ' + get(pid + '-date') : '')]];
+      } else {
+        const aid = 'av' + w;
+        fields = [['What matters', get(aid + '-important')], ['Questions', get(aid + '-questions')], ['Discussed with', get(aid + '-with') + (get(aid + '-date') ? ' on ' + get(aid + '-date') : '')]];
+      }
+      writeSection(heading, fields);
+    }
+
+    writeSection('LABOUR AND BIRTH', [['Who I want with me', get('labour-who')], ['What matters', get('labour-important')], ['Communication preferences', get('labour-comms')], ['Procedures to discuss', get('labour-procedures')], ['Questions', get('labour-questions')], ['Discussed with', get('labour-with') + (get('labour-date') ? ' on ' + get('labour-date') : '')]]);
+    writeSection('POSTNATAL — FIRST MOMENTS', [['What matters', get('post-moments')], ['Questions', get('post-moments-q')]]);
+    writeSection('POSTNATAL — FIRST DAYS', [['What matters', get('post-days')], ['Questions', get('post-days-q')]]);
+    writeSection('POSTNATAL — GOING HOME', [['What matters', get('post-home')], ['Questions', get('post-home-q')], ['Discussed with', get('post-with') + (get('post-date') ? ' on ' + get('post-date') : '')]]);
+
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'maternity-care-plan.txt'; a.click();
+    URL.revokeObjectURL(url);
+  }
+</script>
+</body>
+</html>
