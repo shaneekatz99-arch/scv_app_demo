@@ -273,6 +273,8 @@
     .discussed-row { display: flex; gap: 8px; margin-top: 4px; }
     .discussed-row input { flex: 2; }
     .discussed-row input:last-child { flex: 1; }
+    input[type="date"] { cursor: pointer; padding: 11px 10px; }
+    input[type="date"]::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.6; }
 
     /* BRAND box */
     .brand-box { border: 0.5px solid var(--border); border-radius: var(--radius-md); padding: 12px 13px; margin-bottom: 20px; background: var(--bg-primary); }
@@ -502,7 +504,7 @@
         <div class="field-group"><label class="field-label">What's important to me at this time</label><textarea id="booking-important" placeholder="How you're feeling, what matters most right now..." oninput="save()"></textarea></div>
         <div class="field-group"><label class="field-label">Questions for my healthcare provider</label><textarea id="booking-questions" placeholder="Write your questions here..." oninput="save()"></textarea></div>
         <label class="field-label">Discussed with / on date</label>
-        <div class="discussed-row"><input type="text" id="booking-with" placeholder="Provider name" oninput="save()"><input type="text" id="booking-date" placeholder="Date" oninput="save()"></div>
+        <div class="discussed-row"><input type="text" id="booking-with" placeholder="Provider name" oninput="save()"><input type="date" id="booking-date" oninput="save()"></div>
       </div>
     </div>
   </div>
@@ -523,7 +525,7 @@
           <div class="field-group mt-12"><label class="field-label">What's important to me at this time</label><textarea id="w20-important" oninput="save()"></textarea></div>
           <div class="field-group"><label class="field-label">Questions for my provider</label><textarea id="w20-questions" oninput="save()"></textarea></div>
           <label class="field-label">Discussed with / on date</label>
-          <div class="discussed-row"><input type="text" id="w20-with" placeholder="Provider name" oninput="save()"><input type="text" id="w20-date" placeholder="Date" oninput="save()"></div>
+          <div class="discussed-row"><input type="text" id="w20-with" placeholder="Provider name" oninput="save()"><input type="date" id="w20-date" oninput="save()"></div>
         </div>
       </div>
 
@@ -537,7 +539,7 @@
           <div class="field-group mt-12"><label class="field-label">What's important to me at this time</label><textarea id="w28-important" oninput="save()"></textarea></div>
           <div class="field-group"><label class="field-label">Questions for my provider</label><textarea id="w28-questions" oninput="save()"></textarea></div>
           <label class="field-label">Discussed with / on date</label>
-          <div class="discussed-row"><input type="text" id="w28-with" placeholder="Provider name" oninput="save()"><input type="text" id="w28-date" placeholder="Date" oninput="save()"></div>
+          <div class="discussed-row"><input type="text" id="w28-with" placeholder="Provider name" oninput="save()"><input type="date" id="w28-date" oninput="save()"></div>
         </div>
       </div>
 
@@ -549,7 +551,7 @@
           <div class="field-group mt-12"><label class="field-label">What's important to me at this time</label><textarea id="w32-important" oninput="save()"></textarea></div>
           <div class="field-group"><label class="field-label">Questions for my provider</label><textarea id="w32-questions" oninput="save()"></textarea></div>
           <label class="field-label">Discussed with / on date</label>
-          <div class="discussed-row"><input type="text" id="w32-with" placeholder="Provider name" oninput="save()"><input type="text" id="w32-date" placeholder="Date" oninput="save()"></div>
+          <div class="discussed-row"><input type="text" id="w32-with" placeholder="Provider name" oninput="save()"><input type="date" id="w32-date" oninput="save()"></div>
         </div>
       </div>
 
@@ -562,7 +564,7 @@
           <div class="field-group mt-12"><label class="field-label">What's important to me at this time</label><textarea id="w36-important" oninput="save()"></textarea></div>
           <div class="field-group"><label class="field-label">Questions for my provider</label><textarea id="w36-questions" oninput="save()"></textarea></div>
           <label class="field-label">Discussed with / on date</label>
-          <div class="discussed-row"><input type="text" id="w36-with" placeholder="Provider name" oninput="save()"><input type="text" id="w36-date" placeholder="Date" oninput="save()"></div>
+          <div class="discussed-row"><input type="text" id="w36-with" placeholder="Provider name" oninput="save()"><input type="date" id="w36-date" oninput="save()"></div>
         </div>
       </div>
 
@@ -574,7 +576,7 @@
           <div class="field-group mt-12"><label class="field-label">What's important to me at this time</label><textarea id="w40-important" oninput="save()"></textarea></div>
           <div class="field-group"><label class="field-label">Questions for my provider</label><textarea id="w40-questions" oninput="save()"></textarea></div>
           <label class="field-label">Discussed with / on date</label>
-          <div class="discussed-row"><input type="text" id="w40-with" placeholder="Provider name" oninput="save()"><input type="text" id="w40-date" placeholder="Date" oninput="save()"></div>
+          <div class="discussed-row"><input type="text" id="w40-with" placeholder="Provider name" oninput="save()"><input type="date" id="w40-date" oninput="save()"></div>
         </div>
       </div>
 
@@ -622,7 +624,7 @@
     <div class="field-group"><label class="field-label">Procedures or decisions I'd like to discuss beforehand</label><textarea id="labour-procedures" placeholder="e.g. episiotomy, assisted delivery, induction..." oninput="save()"></textarea></div>
     <div class="field-group"><label class="field-label">Questions or requests for my healthcare provider</label><textarea id="labour-questions" oninput="save()"></textarea></div>
     <label class="field-label">Discussed with / on date</label>
-    <div class="discussed-row"><input type="text" id="labour-with" placeholder="Provider name" oninput="save()"><input type="text" id="labour-date" placeholder="Date" oninput="save()"></div>
+    <div class="discussed-row"><input type="text" id="labour-with" placeholder="Provider name" oninput="save()"><input type="date" id="labour-date" oninput="save()"></div>
   </div>
 
   <!-- POSTNATAL -->
@@ -654,7 +656,7 @@
       </div>
     </div>
     <label class="field-label" style="display:block; margin-top:4px;">Discussed with / on date</label>
-    <div class="discussed-row"><input type="text" id="post-with" placeholder="Provider name" oninput="save()"><input type="text" id="post-date" placeholder="Date" oninput="save()"></div>
+    <div class="discussed-row"><input type="text" id="post-with" placeholder="Provider name" oninput="save()"><input type="date" id="post-date" oninput="save()"></div>
   </div>
 
   <div class="bottom-nav">
@@ -720,7 +722,7 @@
         <label class="field-label">Discussed with / on date</label>
         <div class="discussed-row">
           <input type="text" id="${id}-with" placeholder="Provider name" oninput="save()">
-          <input type="text" id="${id}-date" placeholder="Date" oninput="save()">
+          <input type="date" id="${id}-date" oninput="save()">
         </div>
       </div>`;
 
@@ -885,9 +887,15 @@
       </w:p>`;
     }
 
+    function formatDate(d) {
+      if (!d) return '';
+      const parts = d.split('-');
+      if (parts.length === 3) return parts[2] + '/' + parts[1] + '/' + parts[0];
+      return d;
+    }
     function discussedWith(withVal, dateVal) {
       if (!withVal && !dateVal) return '';
-      const text = [withVal ? 'Discussed with: ' + withVal : '', dateVal ? 'Date: ' + dateVal : ''].filter(Boolean).join('   ');
+      const text = [withVal ? 'Discussed with: ' + withVal : '', dateVal ? 'Date: ' + formatDate(dateVal) : ''].filter(Boolean).join('   ');
       return `<w:p>
         <w:pPr><w:spacing w:before="80" w:after="80"/>
           <w:shd w:val="clear" w:color="auto" w:fill="F0F9F6"/>
@@ -1137,7 +1145,7 @@ ${body}
 
     writeSection('ABOUT ME', [['Name', get('name')], ['Pronouns', get('pronouns')], ['Support person/s', get('support')], ['Care team', get('careteam')]]);
     writeSection('WHAT MATTERS TO ME', [...(ticked.length ? [['Priorities', ticked.map(t => '• ' + t).join('\n')]] : []), ['In my own words', get('matters-text')]]);
-    writeSection('BOOKING VISIT', [['Medical history', get('booking-history')], ['What matters', get('booking-important')], ['Questions', get('booking-questions')], ['Discussed with', get('booking-with') + (get('booking-date') ? ' on ' + get('booking-date') : '')]]);
+    writeSection('BOOKING VISIT', [['Medical history', get('booking-history')], ['What matters', get('booking-important')], ['Questions', get('booking-questions')], ['Discussed with', get('booking-with') + (get('booking-date') ? ' on ' + formatDate(get('booking-date')) : '')]]);
 
     const stdWeekIds = { 20: 'w20', 28: 'w28', 32: 'w32', 36: 'w36', 40: 'w40' };
     const allCards = [...document.getElementById('visit-list').querySelectorAll('.visit-card[data-week]')];
