@@ -310,6 +310,31 @@
     .mt-12 { margin-top: 12px; }
     .mt-16 { margin-top: 16px; }
 
+
+    /* ── Mood selector ── */
+    .mood-group { margin-bottom: 14px; }
+    .mood-label { font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; display: block; }
+    .mood-options { display: flex; gap: 6px; }
+    .mood-btn {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      padding: 8px 4px;
+      border: 0.5px solid var(--border);
+      border-radius: var(--border-radius-md, 10px);
+      background: var(--bg-primary);
+      cursor: pointer;
+      font-family: inherit;
+      transition: border-color 0.15s, background 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .mood-btn:hover { border-color: var(--teal); }
+    .mood-btn.selected { border-color: var(--teal); background: var(--teal-light); }
+    .mood-emoji { font-size: 22px; line-height: 1; }
+    .mood-num { font-size: 10px; color: var(--text-tertiary); font-weight: 500; }
+    .mood-btn.selected .mood-num { color: var(--teal); font-weight: 600; }
     /* ── Login screen ── */
     .login-screen {
       position: fixed;
@@ -498,8 +523,19 @@
     <div class="visit-card">
       <div class="visit-header"><h3>Booking visit</h3><span>First trimester</span></div>
       <div class="visit-body">
-        <div class="accordion"><button class="accordion-trigger" onclick="toggleAccordion(this)"><div class="accordion-trigger-left"><svg class="icon" width="16" height="16"><use href="#ico-flask"/></svg><span class="accordion-label">Recommended tests</span></div><svg class="icon accordion-chevron" width="16" height="16"><use href="#ico-chevron-down"/></svg></button><div class="accordion-body"><ul class="test-list"><li>Blood group and antibody screen</li><li>Full blood count</li><li>Urine test</li><li>Infections in pregnancy — syphilis, HIV, Hepatitis B, Hepatitis C, Rubella</li></ul></div></div>
-        <div class="accordion"><button class="accordion-trigger" onclick="toggleAccordion(this)"><div class="accordion-trigger-left"><svg class="icon" width="16" height="16"><use href="#ico-circle-plus"/></svg><span class="accordion-label">Additional tests that may be offered</span></div><svg class="icon accordion-chevron" width="16" height="16"><use href="#ico-chevron-down"/></svg></button><div class="accordion-body"><ul class="test-list"><li>Iron levels</li><li>Early diabetes testing</li><li>Thyroid function</li><li>CMV and varicella antibodies</li><li>Dating ultrasound</li><li>Cervical screening</li><li>Genetic testing — NIPT, combined first trimester screening</li></ul></div></div>
+        <div class="accordion"><button class="accordion-trigger" onclick="toggleAccordion(this)"><div class="accordion-trigger-left"><svg class="icon" width="16" height="16"><use href="#ico-flask"/></svg><span class="accordion-label">Recommended tests due this visit</span></div><svg class="icon accordion-chevron" width="16" height="16"><use href="#ico-chevron-down"/></svg></button><div class="accordion-body"><ul class="test-list"><li>Blood group and antibody screen</li><li>Full blood count</li><li>Urine test</li><li>Infections in pregnancy — syphilis, HIV, Hepatitis B, Hepatitis C, Rubella</li></ul></div></div>
+        <div class="accordion"><button class="accordion-trigger" onclick="toggleAccordion(this)"><div class="accordion-trigger-left"><svg class="icon" width="16" height="16"><use href="#ico-circle-plus"/></svg><span class="accordion-label">Additional tests that may be offered</span></div><svg class="icon accordion-chevron" width="16" height="16"><use href="#ico-chevron-down"/></svg></button><div class="accordion-body"><ul class="test-list"><li>Iron levels</li><li>Early diabetes testing</li><li>Thyroid function</li><li>CMV and varicella antibodies</li><li>Dating ultrasound</li><li>Cervical screening</li><li>Genetic screening</li><li>Fetal DNA (for anti-D planning)</li></ul></div></div>
+        <div class="mood-group">
+          <label class="mood-label">How I'm feeling today</label>
+          <div class="mood-options">
+            <button type="button" class="mood-btn" onclick="selectMood('booking', 1, this)"><span class="mood-emoji">😔</span><span class="mood-num">1</span></button>
+            <button type="button" class="mood-btn" onclick="selectMood('booking', 2, this)"><span class="mood-emoji">😕</span><span class="mood-num">2</span></button>
+            <button type="button" class="mood-btn" onclick="selectMood('booking', 3, this)"><span class="mood-emoji">😐</span><span class="mood-num">3</span></button>
+            <button type="button" class="mood-btn" onclick="selectMood('booking', 4, this)"><span class="mood-emoji">🙂</span><span class="mood-num">4</span></button>
+            <button type="button" class="mood-btn" onclick="selectMood('booking', 5, this)"><span class="mood-emoji">😊</span><span class="mood-num">5</span></button>
+          </div>
+          <input type="hidden" id="booking-mood" oninput="save()">
+        </div>
         <div class="field-group mt-12"><label class="field-label">My medical history</label><textarea id="booking-history" placeholder="Previous pregnancies, conditions, surgeries..." oninput="save()"></textarea></div>
         <div class="field-group"><label class="field-label">What's important to me at this time</label><textarea id="booking-important" placeholder="How you're feeling, what matters most right now..." oninput="save()"></textarea></div>
         <div class="field-group"><label class="field-label">Questions for my healthcare provider</label><textarea id="booking-questions" placeholder="Write your questions here..." oninput="save()"></textarea></div>
@@ -520,9 +556,20 @@
       <div class="visit-card" data-week="20">
         <div class="visit-header"><h3>20–22 week visit</h3><span>Second trimester</span></div>
         <div class="visit-body">
-          <div class="accordion"><button class="accordion-trigger" onclick="toggleAccordion(this)"><div class="accordion-trigger-left"><svg class="icon" width="16" height="16"><use href="#ico-flask"/></svg><span class="accordion-label">Recommended tests</span></div><svg class="icon accordion-chevron" width="16" height="16"><use href="#ico-chevron-down"/></svg></button><div class="accordion-body"><ul class="test-list"><li>Morphology ultrasound — a detailed check of your baby's development, position, the placenta and cervix</li></ul></div></div>
-          <div class="accordion"><button class="accordion-trigger" onclick="toggleAccordion(this)"><div class="accordion-trigger-left"><svg class="icon" width="16" height="16"><use href="#ico-vaccine"/></svg><span class="accordion-label">Routinely offered treatments</span></div><svg class="icon accordion-chevron" width="16" height="16"><use href="#ico-chevron-down"/></svg></button><div class="accordion-body"><ul class="test-list"><li>Whooping cough vaccine (20–32 weeks)</li><li>RSV vaccine (offered 28–32 weeks)</li><li>Influenza vaccine (offered any time during pregnancy)</li></ul></div></div>
-          <div class="field-group mt-12"><label class="field-label">What's important to me at this time</label><textarea id="w20-important" oninput="save()"></textarea></div>
+          <div class="accordion"><button class="accordion-trigger" onclick="toggleAccordion(this)"><div class="accordion-trigger-left"><svg class="icon" width="16" height="16"><use href="#ico-flask"/></svg><span class="accordion-label">Recommended tests due this visit</span></div><svg class="icon accordion-chevron" width="16" height="16"><use href="#ico-chevron-down"/></svg></button><div class="accordion-body"><ul class="test-list"><li>Morphology ultrasound — a detailed check of your baby's development, position, the placenta and cervix</li></ul></div></div>
+          <div class="accordion"><button class="accordion-trigger" onclick="toggleAccordion(this)"><div class="accordion-trigger-left"><svg class="icon" width="16" height="16"><use href="#ico-vaccine"/></svg><span class="accordion-label">Routinely offered vaccinations</span></div><svg class="icon accordion-chevron" width="16" height="16"><use href="#ico-chevron-down"/></svg></button><div class="accordion-body"><ul class="test-list"><li>Whooping cough vaccine (20–32 weeks)</li><li>Influenza vaccine (offered any time during pregnancy)</li></ul></div></div>
+          <div class="mood-group">
+          <label class="mood-label">How I'm feeling today</label>
+          <div class="mood-options">
+            <button type="button" class="mood-btn" onclick="selectMood('w20', 1, this)"><span class="mood-emoji">😔</span><span class="mood-num">1</span></button>
+            <button type="button" class="mood-btn" onclick="selectMood('w20', 2, this)"><span class="mood-emoji">😕</span><span class="mood-num">2</span></button>
+            <button type="button" class="mood-btn" onclick="selectMood('w20', 3, this)"><span class="mood-emoji">😐</span><span class="mood-num">3</span></button>
+            <button type="button" class="mood-btn" onclick="selectMood('w20', 4, this)"><span class="mood-emoji">🙂</span><span class="mood-num">4</span></button>
+            <button type="button" class="mood-btn" onclick="selectMood('w20', 5, this)"><span class="mood-emoji">😊</span><span class="mood-num">5</span></button>
+          </div>
+          <input type="hidden" id="w20-mood" oninput="save()">
+        </div>
+        <div class="field-group mt-12"><label class="field-label">What's important to me at this time</label><textarea id="w20-important" oninput="save()"></textarea></div>
           <div class="field-group"><label class="field-label">Questions for my provider</label><textarea id="w20-questions" oninput="save()"></textarea></div>
           <label class="field-label">Discussed with / on date</label>
           <div class="discussed-row"><input type="text" id="w20-with" placeholder="Provider name" oninput="save()"><input type="date" id="w20-date" oninput="save()"></div>
@@ -533,10 +580,21 @@
       <div class="visit-card" data-week="28">
         <div class="visit-header"><h3>28–30 week visit</h3><span>Third trimester</span></div>
         <div class="visit-body">
-          <div class="accordion"><button class="accordion-trigger" onclick="toggleAccordion(this)"><div class="accordion-trigger-left"><svg class="icon" width="16" height="16"><use href="#ico-flask"/></svg><span class="accordion-label">Recommended tests</span></div><svg class="icon accordion-chevron" width="16" height="16"><use href="#ico-chevron-down"/></svg></button><div class="accordion-body"><ul class="test-list"><li>Repeat blood counts</li><li>Blood group and antibodies</li><li>Syphilis serology</li><li>Oral glucose tolerance test (diabetes check)</li></ul></div></div>
-          <div class="accordion"><button class="accordion-trigger" onclick="toggleAccordion(this)"><div class="accordion-trigger-left"><svg class="icon" width="16" height="16"><use href="#ico-vaccine"/></svg><span class="accordion-label">Routinely offered treatments</span></div><svg class="icon accordion-chevron" width="16" height="16"><use href="#ico-chevron-down"/></svg></button><div class="accordion-body"><ul class="test-list"><li>Whooping cough vaccine (20–32 weeks)</li><li>RSV vaccine (28–32 weeks)</li><li>Influenza vaccine (any time)</li><li>Anti-D injection</li></ul></div></div>
+          <div class="accordion"><button class="accordion-trigger" onclick="toggleAccordion(this)"><div class="accordion-trigger-left"><svg class="icon" width="16" height="16"><use href="#ico-flask"/></svg><span class="accordion-label">Recommended tests due this visit</span></div><svg class="icon accordion-chevron" width="16" height="16"><use href="#ico-chevron-down"/></svg></button><div class="accordion-body"><ul class="test-list"><li>Repeat blood counts</li><li>Blood group and antibodies</li><li>Syphilis serology</li><li>Oral glucose tolerance test (diabetes check)</li></ul></div></div>
+          <div class="accordion"><button class="accordion-trigger" onclick="toggleAccordion(this)"><div class="accordion-trigger-left"><svg class="icon" width="16" height="16"><use href="#ico-vaccine"/></svg><span class="accordion-label">Routinely offered vaccinations</span></div><svg class="icon accordion-chevron" width="16" height="16"><use href="#ico-chevron-down"/></svg></button><div class="accordion-body"><ul class="test-list"><li>Whooping cough vaccine (20–32 weeks)</li><li>RSV vaccine (28–32 weeks)</li><li>Influenza vaccine (any time)</li></ul></div></div>
           <div class="accordion"><button class="accordion-trigger" onclick="toggleAccordion(this)"><div class="accordion-trigger-left"><svg class="icon" width="16" height="16"><use href="#ico-circle-plus"/></svg><span class="accordion-label">Additional tests that may be offered</span></div><svg class="icon accordion-chevron" width="16" height="16"><use href="#ico-chevron-down"/></svg></button><div class="accordion-body"><ul class="test-list"><li>STI screening — chlamydia, gonorrhoea</li><li>Iron stores</li><li>Growth ultrasound (may be offered 28–32 weeks)</li></ul></div></div>
-          <div class="field-group mt-12"><label class="field-label">What's important to me at this time</label><textarea id="w28-important" oninput="save()"></textarea></div>
+          <div class="mood-group">
+          <label class="mood-label">How I'm feeling today</label>
+          <div class="mood-options">
+            <button type="button" class="mood-btn" onclick="selectMood('w28', 1, this)"><span class="mood-emoji">😔</span><span class="mood-num">1</span></button>
+            <button type="button" class="mood-btn" onclick="selectMood('w28', 2, this)"><span class="mood-emoji">😕</span><span class="mood-num">2</span></button>
+            <button type="button" class="mood-btn" onclick="selectMood('w28', 3, this)"><span class="mood-emoji">😐</span><span class="mood-num">3</span></button>
+            <button type="button" class="mood-btn" onclick="selectMood('w28', 4, this)"><span class="mood-emoji">🙂</span><span class="mood-num">4</span></button>
+            <button type="button" class="mood-btn" onclick="selectMood('w28', 5, this)"><span class="mood-emoji">😊</span><span class="mood-num">5</span></button>
+          </div>
+          <input type="hidden" id="w28-mood" oninput="save()">
+        </div>
+        <div class="field-group mt-12"><label class="field-label">What's important to me at this time</label><textarea id="w28-important" oninput="save()"></textarea></div>
           <div class="field-group"><label class="field-label">Questions for my provider</label><textarea id="w28-questions" oninput="save()"></textarea></div>
           <label class="field-label">Discussed with / on date</label>
           <div class="discussed-row"><input type="text" id="w28-with" placeholder="Provider name" oninput="save()"><input type="date" id="w28-date" oninput="save()"></div>
@@ -547,8 +605,19 @@
       <div class="visit-card" data-week="32">
         <div class="visit-header"><h3>32–34 week visit</h3><span>Third trimester</span></div>
         <div class="visit-body">
-          <div class="accordion"><button class="accordion-trigger" onclick="toggleAccordion(this)"><div class="accordion-trigger-left"><svg class="icon" width="16" height="16"><use href="#ico-message-circle"/></svg><span class="accordion-label">Important conversations at this time</span></div><svg class="icon accordion-chevron" width="16" height="16"><use href="#ico-chevron-down"/></svg></button><div class="accordion-body"><ul class="test-list"><li>Labour signs and preparing for birth</li><li>Sleep quality</li><li>Social and emotional wellbeing</li><li>Breastfeeding and alternatives</li></ul></div></div>
-          <div class="field-group mt-12"><label class="field-label">What's important to me at this time</label><textarea id="w32-important" oninput="save()"></textarea></div>
+          <div class="accordion"><button class="accordion-trigger" onclick="toggleAccordion(this)"><div class="accordion-trigger-left"><svg class="icon" width="16" height="16"><use href="#ico-message-circle"/></svg><span class="accordion-label">Common discussions at this visit</span></div><svg class="icon accordion-chevron" width="16" height="16"><use href="#ico-chevron-down"/></svg></button><div class="accordion-body"><ul class="test-list"><li>Labour signs and preparing for birth</li><li>Preparing for baby</li><li>Sleep quality</li><li>Mental health</li><li>Social and emotional wellbeing</li><li>Antenatal expressing</li><li>Breastfeeding and alternatives</li></ul></div></div>
+          <div class="mood-group">
+          <label class="mood-label">How I'm feeling today</label>
+          <div class="mood-options">
+            <button type="button" class="mood-btn" onclick="selectMood('w32', 1, this)"><span class="mood-emoji">😔</span><span class="mood-num">1</span></button>
+            <button type="button" class="mood-btn" onclick="selectMood('w32', 2, this)"><span class="mood-emoji">😕</span><span class="mood-num">2</span></button>
+            <button type="button" class="mood-btn" onclick="selectMood('w32', 3, this)"><span class="mood-emoji">😐</span><span class="mood-num">3</span></button>
+            <button type="button" class="mood-btn" onclick="selectMood('w32', 4, this)"><span class="mood-emoji">🙂</span><span class="mood-num">4</span></button>
+            <button type="button" class="mood-btn" onclick="selectMood('w32', 5, this)"><span class="mood-emoji">😊</span><span class="mood-num">5</span></button>
+          </div>
+          <input type="hidden" id="w32-mood" oninput="save()">
+        </div>
+        <div class="field-group mt-12"><label class="field-label">What's important to me at this time</label><textarea id="w32-important" oninput="save()"></textarea></div>
           <div class="field-group"><label class="field-label">Questions for my provider</label><textarea id="w32-questions" oninput="save()"></textarea></div>
           <label class="field-label">Discussed with / on date</label>
           <div class="discussed-row"><input type="text" id="w32-with" placeholder="Provider name" oninput="save()"><input type="date" id="w32-date" oninput="save()"></div>
@@ -559,9 +628,20 @@
       <div class="visit-card" data-week="36">
         <div class="visit-header"><h3>36 week visit</h3><span>Third trimester</span></div>
         <div class="visit-body">
-          <div class="accordion"><button class="accordion-trigger" onclick="toggleAccordion(this)"><div class="accordion-trigger-left"><svg class="icon" width="16" height="16"><use href="#ico-flask"/></svg><span class="accordion-label">Recommended tests</span></div><svg class="icon accordion-chevron" width="16" height="16"><use href="#ico-chevron-down"/></svg></button><div class="accordion-body"><ul class="test-list"><li>Repeat blood counts</li><li>Group B streptococcus swab</li></ul></div></div>
+          <div class="accordion"><button class="accordion-trigger" onclick="toggleAccordion(this)"><div class="accordion-trigger-left"><svg class="icon" width="16" height="16"><use href="#ico-flask"/></svg><span class="accordion-label">Recommended tests due this visit</span></div><svg class="icon accordion-chevron" width="16" height="16"><use href="#ico-chevron-down"/></svg></button><div class="accordion-body"><ul class="test-list"><li>Repeat blood counts</li><li>Group B streptococcus swab</li></ul></div></div>
           <div class="accordion"><button class="accordion-trigger" onclick="toggleAccordion(this)"><div class="accordion-trigger-left"><svg class="icon" width="16" height="16"><use href="#ico-circle-plus"/></svg><span class="accordion-label">Additional tests that may be offered</span></div><svg class="icon accordion-chevron" width="16" height="16"><use href="#ico-chevron-down"/></svg></button><div class="accordion-body"><ul class="test-list"><li>Growth ultrasound (usually 32–36 weeks, based on risk factors)</li><li>Iron stores</li></ul></div></div>
-          <div class="field-group mt-12"><label class="field-label">What's important to me at this time</label><textarea id="w36-important" oninput="save()"></textarea></div>
+          <div class="mood-group">
+          <label class="mood-label">How I'm feeling today</label>
+          <div class="mood-options">
+            <button type="button" class="mood-btn" onclick="selectMood('w36', 1, this)"><span class="mood-emoji">😔</span><span class="mood-num">1</span></button>
+            <button type="button" class="mood-btn" onclick="selectMood('w36', 2, this)"><span class="mood-emoji">😕</span><span class="mood-num">2</span></button>
+            <button type="button" class="mood-btn" onclick="selectMood('w36', 3, this)"><span class="mood-emoji">😐</span><span class="mood-num">3</span></button>
+            <button type="button" class="mood-btn" onclick="selectMood('w36', 4, this)"><span class="mood-emoji">🙂</span><span class="mood-num">4</span></button>
+            <button type="button" class="mood-btn" onclick="selectMood('w36', 5, this)"><span class="mood-emoji">😊</span><span class="mood-num">5</span></button>
+          </div>
+          <input type="hidden" id="w36-mood" oninput="save()">
+        </div>
+        <div class="field-group mt-12"><label class="field-label">What's important to me at this time</label><textarea id="w36-important" oninput="save()"></textarea></div>
           <div class="field-group"><label class="field-label">Questions for my provider</label><textarea id="w36-questions" oninput="save()"></textarea></div>
           <label class="field-label">Discussed with / on date</label>
           <div class="discussed-row"><input type="text" id="w36-with" placeholder="Provider name" oninput="save()"><input type="date" id="w36-date" oninput="save()"></div>
@@ -573,7 +653,18 @@
         <div class="visit-header"><h3>40 week visit</h3><span>Third trimester</span></div>
         <div class="visit-body">
           <div class="accordion"><button class="accordion-trigger" onclick="toggleAccordion(this)"><div class="accordion-trigger-left"><svg class="icon" width="16" height="16"><use href="#ico-message-circle"/></svg><span class="accordion-label">Common discussions at this visit</span></div><svg class="icon accordion-chevron" width="16" height="16"><use href="#ico-chevron-down"/></svg></button><div class="accordion-body"><ul class="test-list"><li>Induction of labour options if pregnancy continues past your due date</li><li>Checking your baby's wellbeing</li></ul></div></div>
-          <div class="field-group mt-12"><label class="field-label">What's important to me at this time</label><textarea id="w40-important" oninput="save()"></textarea></div>
+          <div class="mood-group">
+          <label class="mood-label">How I'm feeling today</label>
+          <div class="mood-options">
+            <button type="button" class="mood-btn" onclick="selectMood('w40', 1, this)"><span class="mood-emoji">😔</span><span class="mood-num">1</span></button>
+            <button type="button" class="mood-btn" onclick="selectMood('w40', 2, this)"><span class="mood-emoji">😕</span><span class="mood-num">2</span></button>
+            <button type="button" class="mood-btn" onclick="selectMood('w40', 3, this)"><span class="mood-emoji">😐</span><span class="mood-num">3</span></button>
+            <button type="button" class="mood-btn" onclick="selectMood('w40', 4, this)"><span class="mood-emoji">🙂</span><span class="mood-num">4</span></button>
+            <button type="button" class="mood-btn" onclick="selectMood('w40', 5, this)"><span class="mood-emoji">😊</span><span class="mood-num">5</span></button>
+          </div>
+          <input type="hidden" id="w40-mood" oninput="save()">
+        </div>
+        <div class="field-group mt-12"><label class="field-label">What's important to me at this time</label><textarea id="w40-important" oninput="save()"></textarea></div>
           <div class="field-group"><label class="field-label">Questions for my provider</label><textarea id="w40-questions" oninput="save()"></textarea></div>
           <label class="field-label">Discussed with / on date</label>
           <div class="discussed-row"><input type="text" id="w40-with" placeholder="Provider name" oninput="save()"><input type="date" id="w40-date" oninput="save()"></div>
@@ -670,6 +761,18 @@
 
 <script>
 
+
+  function selectMood(id, value, btn) {
+    // Deselect siblings
+    const siblings = btn.parentElement.querySelectorAll('.mood-btn');
+    siblings.forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    // Store value
+    const hidden = document.getElementById(id + '-mood');
+    if (hidden) { hidden.value = value; }
+    save();
+  }
+
   function enterApp() {
     const screen = document.getElementById('login-screen');
     screen.style.transition = 'opacity 0.3s ease';
@@ -717,6 +820,17 @@
         </div>
       </div>
       <div class="visit-body">
+        <div class="mood-group">
+          <label class="mood-label">How I'm feeling today</label>
+          <div class="mood-options">
+            <button type="button" class="mood-btn" onclick="selectMood('${id}', 1, this)"><span class="mood-emoji">😔</span><span class="mood-num">1</span></button>
+            <button type="button" class="mood-btn" onclick="selectMood('${id}', 2, this)"><span class="mood-emoji">😕</span><span class="mood-num">2</span></button>
+            <button type="button" class="mood-btn" onclick="selectMood('${id}', 3, this)"><span class="mood-emoji">😐</span><span class="mood-num">3</span></button>
+            <button type="button" class="mood-btn" onclick="selectMood('${id}', 4, this)"><span class="mood-emoji">🙂</span><span class="mood-num">4</span></button>
+            <button type="button" class="mood-btn" onclick="selectMood('${id}', 5, this)"><span class="mood-emoji">😊</span><span class="mood-num">5</span></button>
+          </div>
+          <input type="hidden" id="${id}-mood">
+        </div>
         <div class="field-group"><label class="field-label">What's important to me at this time</label><textarea id="${id}-important" oninput="save()"></textarea></div>
         <div class="field-group"><label class="field-label">Questions for my provider</label><textarea id="${id}-questions" oninput="save()"></textarea></div>
         <label class="field-label">Discussed with / on date</label>
@@ -1160,7 +1274,9 @@ ${body}
         fields = [['What matters', get(pid + '-important')], ['Questions', get(pid + '-questions')], ['Discussed with', get(pid + '-with') + (get(pid + '-date') ? ' on ' + get(pid + '-date') : '')]];
       } else {
         const aid = 'av' + w;
-        fields = [['What matters', get(aid + '-important')], ['Questions', get(aid + '-questions')], ['Discussed with', get(aid + '-with') + (get(aid + '-date') ? ' on ' + get(aid + '-date') : '')]];
+        const avMoodVal = document.getElementById(aid + '-mood') ? document.getElementById(aid + '-mood').value : '';
+        const avMoodEmojis = {'1':'😔 1','2':'😕 2','3':'😐 3','4':'🙂 4','5':'😊 5'};
+        fields = [['How I was feeling', avMoodVal ? avMoodEmojis[avMoodVal] || avMoodVal : ''], ['What matters', get(aid + '-important')], ['Questions', get(aid + '-questions')], ['Discussed with', get(aid + '-with') + (get(aid + '-date') ? ' on ' + formatDate(get(aid + '-date')) : '')]];
       }
       writeSection(heading, fields);
     }
